@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "module": "ESNext",
+    "target": "es2022",
+    "resolveJsonModule": true,
+    "strictNullChecks": false,
+    "noImplicitAny": true,
+    "skipLibCheck": true,
+    "importHelpers": true,
+    "types": ["node"],
+    "strict": true,
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "outDir": "dist", 
+    "baseUrl": "src",
+    "paths": {
+      "*": ["node_modules/*", "src"]
+    }
+  },
+  "ts-node": {
+    "esm": true
+  },
+  "include": ["./src/**/*.ts"],
+  "exclude": ["src/public"]
+}
