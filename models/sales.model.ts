@@ -1,8 +1,7 @@
 import mongoose from "mongoose";
-
 const SalesSchema = new mongoose.Schema(
     {
-        Transno: {
+        TransNo: {
             type: String,
             required: true
         },
@@ -41,6 +40,5 @@ const SalesSchema = new mongoose.Schema(
     },
     { timestamps: true }
 );
-
 const Sales = mongoose.model("Sales", SalesSchema);
 export default Sales;

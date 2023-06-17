@@ -6,7 +6,8 @@ const ProductSchema = new mongoose.Schema(
             type: Number,
             required: true,
             unique: true,
-            default: 0
+            default: 0,
+            autoIncrement: true,
         },
         Description: {
             type: String,
@@ -27,18 +28,6 @@ const ProductSchema = new mongoose.Schema(
     },
     { timestamps: true }
 );
-
-ProductSchema.pre("save", function (next) {
-    const currentDoc = this;
-    mongoose
-        .model("Product", ProductSchema)
-        .findOne({}, {}, { sort: { ProductCode: -1 } }, function (err, lastDoc) {
-            if (err) return next(err);
-            currentDoc.ProductCode = lastDoc ? lastDoc.ProductCode + 1 : 1;
-            next();
-        });
-});
-
 
 
 const Product = mongoose.model("Product", ProductSchema);

@@ -1,77 +1,82 @@
 import express from 'express';
 import bodyParser from 'body-parser';
-import cors from 'cors';
 import mongoose, { ConnectOptions } from 'mongoose';
 import dotenv from 'dotenv';
-import multer from 'multer';
-import helmet from 'helmet';
-import morgan from 'morgan';
-import path from 'path';
-import { fileURLToPath } from 'url';
 
-//!---------------------- FILE IMPORTS -------------------------------------------------
-import { register } from './controllers/auth.controller.js';
-import { createPost } from './controllers/posts.controller.js';
-import { verifyToken } from './middleware/auth.middleware.js';
-
-import authRoutes from './routes/auth.routes.js';
-import userRoutes from './routes/users.routes.js';
-import postRoutes from './routes/posts.routes.js';
-
-//! IMPORTING THE DUMMY DATA
-// import User from './models/user.model.js';
-// import Post from './models/post.model.js';
-
+//! IMPORTING THE DATA
 import Customer from './models/customer.model.js';
 import Product from './models/product.model.js';
 import Sales from './models/sales.model.js';
-
-import { customersData, productData, salesData } from "./data/dummyData.js";
+import SalesDetails from './models/salesDetails.model.js';
+import { customersData, productData, salesData, salesDetailsData } from "./data/dummyData.js";
 
 
 //! MIDDLEWARE CONFIGS
 const app = express();
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 dotenv.config();
 app.use(express.json());
 app.use(bodyParser.json())
-app.use(helmet());
-app.use(helmet.crossOriginResourcePolicy({ policy: 'cross-origin' }));
-app.use(morgan('common'));
-app.use(bodyParser.json({ limit: '30mb', extended: true } as any));
-app.use(bodyParser.urlencoded({ limit: '30mb', extended: true }));
-app.use(cors());
-app.use('/assets', express.static(path.join(__dirname, 'public/assets')));
 
-//! OUR LOCAL FILE STORAGE
-const storage: multer.StorageEngine = multer.diskStorage({
-  destination: (req: express.Request, file: Express.Multer.File, cb: any) => {
-    cb(null, 'public/assets');
-  },
-  filename: (req: express.Request, file: Express.Multer.File, cb: any) => {
-    cb(null, file.originalname);
-  },
-});
-const upload: multer.Multer = multer({ storage });
 
 app.get('/', (req, res) => {
-  res.send('Hello to La Photographia API');
+  res.send('Hello World!');
 });
 
+app.listen(process.env.PORT, () => {
+  console.log('Server is running...');
+});
 
-//! ROUTES FOR FILES UPLOAD
-app.post("/auth/register", upload.single("picture"), register);
-app.post("/posts", verifyToken, upload.single("picture"), createPost);
+//! PERFORM THE SELECT/READ OPERATION BASED ON WHAT IS ASK IN THE FOLLOWING
+
+//! 9 Get the list of calproducts that Customer Jerry Jayden bought.
+const productsBoughtByJerry = await SalesDetails.find({ CustomerName: "Jerry Jayden" });
+console.log(productsBoughtByJerry);
 
 
-//! ROUTES ENDPOINT OF THE APP
-app.use("/auth", authRoutes);
-app.use("/users", userRoutes);
-app.use("/posts", postRoutes);
+//! 10 Get the products that was sold on January 01, 2023
+const productsSoldOnJan1 = await SalesDetails.find({ DateSold: "2023-01-01" });
+console.log(productsSoldOnJan1);
 
 
-//! CONNECTING OUR API TO DATABASE
+//! 11 Get the overall quantity of the product Leather Shoes that was sold.
+const leatherShoesQuantity = await SalesDetails.aggregate([
+  {
+    $match: { Description: "Leather Shoes" }
+  },
+  {
+    $group: {
+      _id: null,
+      totalQuantity: { $sum: "$Qty" }
+    }
+  }
+]);
+console.log(leatherShoesQuantity);
+
+
+//! 12 Get the customer name , address and contact that was assign to the InvNo “10001”
+const customerWithInvNo10001 = await Sales.findOne({ InvNo: 10001 });
+console.log(customerWithInvNo10001);
+
+
+
+
+
+
+
+//! PERFORM THE UPDATE OPERATION BASED ON WHAT IS ASK IN THE FOLLOWING
+await Sales.updateOne({ CustomerName: "Averill Nasim" }, { Contact: "407864270" });
+await Sales.updateOne({ CustomerName: "Tionge Turan" }, { Status: "Inactive" });
+await Sales.deleteOne({ CustomerCode: "001" });
+
+//! PERFORM THE DELETE OPERATION BASED ON WHAT IS ASK IN THE FOLLOWING
+await Sales.deleteMany({ Transno: "S-101" });
+await SalesDetails.deleteMany({ Transno: "S-101" });
+
+
+
+
+
+//! Connect to MongoDB
 const PORT: string | number = process.env.PORT || 8080;
 mongoose
   .set('strictQuery', true)
@@ -82,16 +87,11 @@ mongoose
   .then(() => {
     app.listen(PORT, () => console.log(`Server is running at Port: ${PORT}`));
 
-
-    //! ADDING THE DUMMY DATA I CREATED  FOR DEVELOPMENT PURPOSES
-    // User.insertMany(Users);
-    // Post.insertMany(Posts);
-
-
-
+    //! Insert Data
     Customer.insertMany(customersData);
     Product.insertMany(productData);
     Sales.insertMany(salesData);
+    SalesDetails.insertMany(salesDetailsData);
+
   })
   .catch((error) => console.log(`${error} Failed to connect to Server`));
-
