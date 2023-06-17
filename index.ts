@@ -62,11 +62,16 @@ console.log(customerWithInvNo10001);
 
 
 
-
 //! PERFORM THE UPDATE OPERATION BASED ON WHAT IS ASK IN THE FOLLOWING
 await Sales.updateOne({ CustomerName: "Averill Nasim" }, { Contact: "407864270" });
 await Sales.updateOne({ CustomerName: "Tionge Turan" }, { Status: "Inactive" });
 await Sales.deleteOne({ CustomerCode: "001" });
+
+
+
+
+
+
 
 //! PERFORM THE DELETE OPERATION BASED ON WHAT IS ASK IN THE FOLLOWING
 await Sales.deleteMany({ Transno: "S-101" });
